@@ -1,7 +1,7 @@
 # 📅 AgendaPro - Sistema de Gestión de Citas Online
 
 [![Estado](https://img.shields.io/badge/Estado-Funcional-success)](https://reserva-de-citas.netlify.app)
-[![Versión](https://img.shields.io/badge/Versión-1.0.0-blue)](https://github.com/projectone2020/agendapro-sistema-citas)
+[![Versión](https://img.shields.io/badge/Versión-1.0.0-blue)](https://github.com/ProjectOne2020/agenda-citas-demo)
 [![Licencia](https://img.shields.io/badge/Licencia-MIT-green)](LICENSE)
 [![React](https://img.shields.io/badge/React-18-61dafb)](https://reactjs.org/)
 [![Tailwind](https://img.shields.io/badge/Tailwind-CSS-38bdf8)](https://tailwindcss.com/)
@@ -883,8 +883,8 @@ vender copias del Software...
 - ✅ Apps móviles nativas
 
 ### **Contáctame:**
-- 📧 Email: contacto@alejandrodev.com
-- 💼 LinkedIn: [Alejandro Gutiérrez](https://linkedin.com/in/alejandro-gutierrez-dev)
+- 📧 Email: alejandro.gutierrezb31@gmail.com
+- 💼 LinkedIn: [Alejandro Gutiérrez](https://www.linkedin.com/in/alejandro-gutierrez-9a0318107/)
 - 🌐 Portafolio: [projectone2020.github.io/portafolio](https://projectone2020.github.io/portafolio/)
 - 📱 WhatsApp: [Enviar mensaje](https://wa.me/528110481221)
 
@@ -921,9 +921,9 @@ vender copias del Software...
 ### **¿Preguntas? ¿Problemas? ¿Sugerencias?**
 
 **Canales de Soporte:**
-- 🐛 [Reportar un Bug](https://github.com/projectone2020/agendapro-sistema-citas/issues)
-- 💡 [Sugerir una Funcionalidad](https://github.com/projectone2020/agendapro-sistema-citas/issues)
-- 📧 Email: soporte@tudominio.com
+- 🐛 [Reportar un Bug](https://github.com/ProjectOne2020/agenda-citas-demo/issues)
+- 💡 [Sugerir una Funcionalidad](https://github.com/ProjectOne2020/agenda-citas-demo/issues)
+- 📧 Email: alejandro.gutierrezb31@gmail.com
 - 💬 Discord: [Unirse al servidor](https://discord.gg/tuservidor)
 
 ---
@@ -941,9 +941,9 @@ Gracias por usar **AgendaPro**. Si este proyecto te fue útil:
 
 ## 📊 Métricas del Proyecto
 
-![GitHub stars](https://img.shields.io/github/stars/projectone2020/agendapro-sistema-citas?style=social)
-![GitHub forks](https://img.shields.io/github/forks/projectone2020/agendapro-sistema-citas?style=social)
-![GitHub watchers](https://img.shields.io/github/watchers/projectone2020/agendapro-sistema-citas?style=social)
+![GitHub stars](https://img.shields.io/github/stars/ProjectOne2020/agenda-citas-demo?style=social)
+![GitHub forks](https://img.shields.io/github/forks/ProjectOne2020/agenda-citas-demo?style=social)
+![GitHub watchers](https://img.shields.io/github/watchers/ProjectOne2020/agenda-citas-demo?style=social)
 
 ---
 
