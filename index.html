@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgendaPro - Sistema de Citas Completo</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <div id="root"></div>
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        
+        function AgendaPro() {
+            const [user, setUser] = useState(null);
+            const [view, setView] = useState('calendar');
+            const [clients, setClients] = useState([]);
+            const [appointments, setAppointments] = useState([]);
+            const [specialists, setSpecialists] = useState([]);
+            const [month, setMonth] = useState(new Date());
+            const [selectedDate, setSelectedDate] = useState(new Date());
+            const [selectedSpecialist, setSelectedSpecialist] = useState(null);
+            const [selectedService, setSelectedService] = useState(null);
+            const [selectedTime, setSelectedTime] = useState(null);
+            const [showModal, setShowModal] = useState(false);
+            const [editItem, setEditItem] = useState(null);
+            const [menuOpen, setMenuOpen] = useState(false);
+            
+            const users = [
+                { user: 'admin', pass: 'admin123', role: 'admin', name: 'Dr. Admin', clientId: null },
+                { user: 'recep', pass: 'recep123', role: 'recep', name: 'Recepcionista', clientId: null },
+                { user: 'cliente', pass: 'cliente123', role: 'client', name: 'Juan Pérez', clientId: 1 }
+            ];
+            
+            useEffect(() => {
+                const data = localStorage.getItem('agendapro-data');
+                if (data) {
+                    const parsed = JSON.parse(data);
+                    setClients(parsed.clients || initClients());
+                    setAppointments(parsed.appointments || initAppointments());
+                    setSpecialists(parsed.specialists || initSpecialists());
+                } else {
+                    setClients(initClients());
+                    setAppointments(initAppointments());
+                    setSpecialists(initSpecialists());
+                }
+            }, []);
+            
+            useEffect(() => {
+                if (clients.length > 0) {
+                    localStorage.setItem('agendapro-data', JSON.stringify({ clients, appointments, specialists }));
+                }
+            }, [clients, appointments, specialists]);
+            
+            function initClients() {
+                return [
+                    { id: 1, name: 'Juan Pérez', phone: '+52 811 123 4567', email: 'juan@email.com' },
+                    { id: 2, name: 'María González', phone: '+52 811 234 5678', email: 'maria@email.com' },
+                    { id: 3, name: 'Carlos López', phone: '+52 811 345 6789', email: 'carlos@email.com' },
+                    { id: 4, name: 'Ana Martínez', phone: '+52 811 456 7890', email: 'ana@email.com' }
+                ];
+            }
+            
+            function initSpecialists() {
+                return [
+                    { id: 1, name: 'Dr. Carlos Ramírez', specialty: 'Cardiología', avatar: '❤️', active: true },
+                    { id: 2, name: 'Dra. Ana López', specialty: 'Dermatología', avatar: '🔬', active: true },
+                    { id: 3, name: 'Dr. Miguel Torres', specialty: 'Traumatología', avatar: '🦴', active: true },
+                    { id: 4, name: 'Dra. Laura Mendoza', specialty: 'Pediatría', avatar: '👶', active: true },
+                    { id: 5, name: 'Dr. Roberto Silva', specialty: 'Neurología', avatar: '🧠', active: true },
+                    { id: 6, name: 'Dra. Patricia Ruiz', specialty: 'Ginecología', avatar: '👩‍⚕️', active: true }
+                ];
+            }
+            
+            function initAppointments() {
+                return [
+                    { id: 1, clientId: 1, specialistId: 1, date: '2024-11-29', time: '09:00', service: 'Consulta Cardiología', status: 'confirmed', paid: true, amount: 800, notes: '' },
+                    { id: 2, clientId: 2, specialistId: 2, date: '2024-11-29', time: '10:00', service: 'Consulta Dermatológica', status: 'confirmed', paid: true, amount: 600, notes: '' },
+                    { id: 3, clientId: 3, specialistId: 3, date: '2024-11-30', time: '11:00', service: 'Consulta Traumatología', status: 'pending', paid: false, amount: 700, notes: '' },
+                    { id: 4, clientId: 4, specialistId: 4, date: '2024-12-01', time: '14:00', service: 'Control Pediátrico', status: 'confirmed', paid: true, amount: 500, notes: '' }
+                ];
+            }
+            
+            const services = {
+                'Cardiología': [
+                    { name: 'Consulta Cardiología', price: 800, duration: 30 },
+                    { name: 'Electrocardiograma', price: 400, duration: 20 },
+                    { name: 'Ecocardiograma', price: 1200, duration: 40 }
+                ],
+                'Dermatología': [
+                    { name: 'Consulta Dermatológica', price: 600, duration: 30 },
+                    { name: 'Tratamiento Acné', price: 500, duration: 45 }
+                ],
+                'Traumatología': [
+                    { name: 'Consulta Traumatología', price: 700, duration: 30 },
+                    { name: 'Infiltración', price: 900, duration: 20 }
+                ],
+                'Pediatría': [
+                    { name: 'Consulta Pediátrica', price: 500, duration: 30 },
+                    { name: 'Control de Niño Sano', price: 400, duration: 25 }
+                ],
+                'Neurología': [
+                    { name: 'Consulta Neurológica', price: 850, duration: 40 },
+                    { name: 'Electroencefalograma', price: 1000, duration: 60 }
+                ],
+                'Ginecología': [
+                    { name: 'Consulta Ginecológica', price: 650, duration: 30 },
+                    { name: 'Papanicolau', price: 400, duration: 20 }
+                ]
+            };
+            
+            const timeSlots = ['08:00','08:30','09:00','09:30','10:00','10:30','11:00','11:30','12:00','12:30','13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30','17:00','17:30','18:00','18:30','19:00','19:30'];
+            
+            const getDaysInMonth = (date) => {
+                const year = date.getFullYear();
+                const monthNum = date.getMonth();
+                const firstDay = new Date(year, monthNum, 1);
+                const lastDay = new Date(year, monthNum + 1, 0);
+                const days = [];
+                const firstDayOfWeek = firstDay.getDay();
+                
+                for (let i = firstDayOfWeek - 1; i >= 0; i--) {
+                    const d = new Date(year, monthNum, -i);
+                    days.push({ date: d, current: false });
+                }
+                
+                for (let i = 1; i <= lastDay.getDate(); i++) {
+                    const d = new Date(year, monthNum, i);
+                    days.push({ date: d, current: true });
+                }
+                
+                const remaining = 42 - days.length;
+                for (let i = 1; i <= remaining; i++) {
+                    const d = new Date(year, monthNum + 1, i);
+                    days.push({ date: d, current: false });
+                }
+                
+                return days;
+            };
+            
+            const formatDate = (d) => {
+                const year = d.getFullYear();
+                const month = String(d.getMonth() + 1).padStart(2, '0');
+                const day = String(d.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            };
+            
+            const isAdmin = user?.role === 'admin';
+            const isRecep = user?.role === 'recep';
+            const isClient = user?.role === 'client';
+            
+            const stats = {
+                today: appointments.filter(a => a.date === formatDate(new Date())).length,
+                pending: appointments.filter(a => a.status === 'pending').length,
+                unpaid: appointments.filter(a => !a.paid && a.status !== 'cancelled').length,
+                revenue: appointments.filter(a => a.paid).reduce((s, a) => s + a.amount, 0),
+                myTotal: appointments.filter(a => a.clientId === user?.clientId).length,
+                myUpcoming: appointments.filter(a => a.clientId === user?.clientId && new Date(a.date) >= new Date() && a.status !== 'cancelled').length
+            };
+            
+            const exportCSV = () => {
+                const headers = 'Fecha,Hora,Cliente,Especialista,Servicio,Estado,Pagado,Monto\n';
+                const rows = appointments.map(a => {
+                    const c = clients.find(x => x.id === a.clientId);
+                    const s = specialists.find(x => x.id === a.specialistId);
+                    return `${a.date},${a.time},"${c?.name}","${s?.name}","${a.service}",${a.status},${a.paid?'Sí':'No'},${a.amount}`;
+                }).join('\n');
+                const csv = headers + rows;
+                const blob = new Blob([csv], { type: 'text/csv' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `citas_${formatDate(new Date())}.csv`;
+                link.click();
+                URL.revokeObjectURL(url);
+                alert('✅ CSV exportado');
+            };
+            
+            const sendReminders = () => {
+                const tomorrow = new Date();
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                const tomorrowStr = formatDate(tomorrow);
+                const count = appointments.filter(a => a.date === tomorrowStr && a.status === 'confirmed').length;
+                alert(`✅ ${count} recordatorios enviados para mañana`);
+            };
+            
+            if (!user) {
+                return (
+                    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-purple-600 to-purple-900">
+                        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8">
+                            <div className="text-center mb-8">
+                                <div className="text-6xl mb-4">📅</div>
+                                <h1 className="text-3xl font-bold text-gray-900">AgendaPro</h1>
+                                <p className="text-gray-600 text-sm mt-2">Sistema de Citas Completo</p>
+                            </div>
+                            <input id="u" type="text" placeholder="Usuario" className="w-full px-4 py-3 border-2 rounded-lg mb-3" />
+                            <input id="p" type="password" placeholder="Contraseña" className="w-full px-4 py-3 border-2 rounded-lg mb-3" />
+                            <button onClick={() => {
+                                const username = document.getElementById('u').value;
+                                const password = document.getElementById('p').value;
+                                const found = users.find(x => x.user === username && x.pass === password);
+                                if (found) {
+                                    setUser(found);
+                                    setView(found.role === 'client' ? 'book' : 'calendar');
+                                } else {
+                                    alert('❌ Credenciales incorrectas');
+                                }
+                            }} className="w-full bg-purple-600 text-white py-3 rounded-lg font-bold hover:bg-purple-700 mb-4">
+                                Iniciar Sesión
+                            </button>
+                            <div className="text-xs text-center text-gray-600 mb-3">Usuarios de prueba:</div>
+                            <div className="grid grid-cols-3 gap-2">
+                                <button onClick={() => { setUser(users[0]); setView('calendar'); }} className="bg-purple-600 text-white py-2 px-3 rounded text-xs hover:bg-purple-700">Admin</button>
+                                <button onClick={() => { setUser(users[1]); setView('calendar'); }} className="bg-yellow-600 text-white py-2 px-3 rounded text-xs hover:bg-yellow-700">Recep</button>
+                                <button onClick={() => { setUser(users[2]); setView('book'); }} className="bg-pink-600 text-white py-2 px-3 rounded text-xs hover:bg-pink-700">Cliente</button>
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+            
+            return (
+                <div className="flex min-h-screen bg-gray-50">
+                    {/* Sidebar */}
+                    <div className={`fixed lg:static inset-y-0 left-0 w-64 bg-white border-r z-50 transform ${menuOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 transition-transform duration-300`}>
+                        <div className="p-6 border-b">
+                            <h1 className="text-xl font-bold text-purple-600">📅 AgendaPro</h1>
+                            <p className="text-xs text-gray-600 mt-1">{user.name}</p>
+                            <span className="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded">{user.role}</span>
+                        </div>
+                        <nav className="py-4">
+                            {isClient ? (
+                                <>
+                                    <div onClick={() => { setView('book'); setMenuOpen(false); }} className={`px-6 py-3 cursor-pointer ${view==='book'?'bg-purple-50 text-purple-600 border-l-4 border-purple-600':'hover:bg-gray-50'}`}>➕ Agendar Cita</div>
+                                    <div onClick={() => { setView('mycitas'); setMenuOpen(false); }} className={`px-6 py-3 cursor-pointer ${view==='mycitas'?'bg-purple-50 text-purple-600 border-l-4 border-purple-600':'hover:bg-gray-50'}`}>📋 Mis Citas</div>
+                                    <div onClick={() => { setView('specialists'); setMenuOpen(false); }} className={`px-6 py-3 cursor-pointer ${view==='specialists'?'bg-purple-50 text-purple-600 border-l-4 border-purple-600':'hover:bg-gray-50'}`}>👨‍⚕️ Especialistas</div>
+                                </>
+                            ) : (
+                                <>
+                                    <div onClick={() => { setView('calendar'); setMenuOpen(false); }} className={`px-6 py-3 cursor-pointer ${view==='calendar'?'bg-purple-50 text-purple-600 border-l-4 border-purple-600':'hover:bg-gray-50'}`}>📅 Calendario</div>
+                                    <div onClick={() => { setView('citas'); setMenuOpen(false); }} className={`px-6 py-3 cursor-pointer ${view==='citas'?'bg-purple-50 text-purple-600 border-l-4 border-purple-600':'hover:bg-gray-50'}`}>📋 Citas</div>
+                                    <div onClick={() => { setView('clients'); setMenuOpen(false); }} className={`px-6 py-3 cursor-pointer ${view==='clients'?'bg-purple-50 text-purple-600 border-l-4 border-purple-600':'hover:bg-gray-50'}`}>👥 Clientes</div>
+                                    <div onClick={() => { setView('specialists'); setMenuOpen(false); }} className={`px-6 py-3 cursor-pointer ${view==='specialists'?'bg-purple-50 text-purple-600 border-l-4 border-purple-600':'hover:bg-gray-50'}`}>👨‍⚕️ Especialistas</div>
+                                    {isAdmin && <div onClick={() => { setView('reports'); setMenuOpen(false); }} className={`px-6 py-3 cursor-pointer ${view==='reports'?'bg-purple-50 text-purple-600 border-l-4 border-purple-600':'hover:bg-gray-50'}`}>📊 Reportes</div>}
+                                    {isAdmin && <div onClick={() => { setView('settings'); setMenuOpen(false); }} className={`px-6 py-3 cursor-pointer ${view==='settings'?'bg-purple-50 text-purple-600 border-l-4 border-purple-600':'hover:bg-gray-50'}`}>⚙️ Configuración</div>}
+                                </>
+                            )}
+                        </nav>
+                        <div className="absolute bottom-0 w-full p-4 border-t">
+                            <button onClick={() => setUser(null)} className="w-full bg-red-600 text-white py-2 rounded hover:bg-red-700">🚪 Salir</button>
+                        </div>
+                    </div>
+                    
+                    <button onClick={() => setMenuOpen(!menuOpen)} className="lg:hidden fixed top-4 left-4 z-50 bg-purple-600 text-white w-12 h-12 rounded-lg shadow-lg flex items-center justify-center text-xl">
+                        {menuOpen ? '✕' : '☰'}
+                    </button>
+                    
+                    {/* Main */}
+                    <div className="flex-1 p-4 lg:p-8 lg:ml-0">
+                        {/* Stats Admin/Recep */}
+                        {!isClient && view === 'calendar' && (
+                            <div className="mb-6">
+                                <h2 className="text-3xl font-bold mb-6">Dashboard</h2>
+                                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                    <div className="bg-white p-6 rounded-xl shadow border-l-4 border-purple-600">
+                                        <div className="text-sm text-gray-600">Citas Hoy</div>
+                                        <div className="text-3xl font-bold text-purple-600">{stats.today}</div>
+                                    </div>
+                                    <div className="bg-white p-6 rounded-xl shadow border-l-4 border-yellow-600">
+                                        <div className="text-sm text-gray-600">{isAdmin ? 'Sin Pagar' : 'Pendientes'}</div>
+                                        <div className="text-3xl font-bold text-yellow-600">{isAdmin ? stats.unpaid : stats.pending}</div>
+                                    </div>
+                                    {isAdmin && (
+                                        <div className="bg-white p-6 rounded-xl shadow border-l-4 border-green-600">
+                                            <div className="text-sm text-gray-600">Ingresos</div>
+                                            <div className="text-3xl font-bold text-green-600">${stats.revenue}</div>
+                                        </div>
+                                    )}
+                                    <div className="bg-white p-6 rounded-xl shadow border-l-4 border-blue-600">
+                                        <div className="text-sm text-gray-600">Clientes</div>
+                                        <div className="text-3xl font-bold text-blue-600">{clients.length}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                        
+                        {/* Calendar Admin/Recep */}
+                        {!isClient && view === 'calendar' && (
+                            <div className="bg-white p-6 rounded-xl shadow">
+                                <div className="flex justify-between items-center mb-4">
+                                    <button onClick={() => { const m = new Date(month); m.setMonth(m.getMonth()-1); setMonth(m); }} className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">← Anterior</button>
+                                    <h3 className="text-xl font-bold">{month.toLocaleDateString('es-MX', {month:'long', year:'numeric'})}</h3>
+                                    <button onClick={() => { const m = new Date(month); m.setMonth(m.getMonth()+1); setMonth(m); }} className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">Siguiente →</button>
+                                </div>
+                                <div className="grid grid-cols-7 gap-2 mb-2">
+                                    {['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'].map(d => <div key={d} className="text-center font-bold text-sm text-gray-600">{d}</div>)}
+                                </div>
+                                <div className="grid grid-cols-7 gap-2">
+                                    {getDaysInMonth(month).map((day, i) => {
+                                        const isToday = formatDate(day.date) === formatDate(new Date());
+                                        const hasApts = appointments.filter(a => a.date === formatDate(day.date)).length > 0;
+                                        return (
+                                            <div key={i} onClick={() => day.current && setSelectedDate(day.date)} className={`aspect-square flex items-center justify-center rounded-lg cursor-pointer relative ${!day.current?'text-gray-300':'hover:bg-purple-50'} ${isToday?'bg-purple-600 text-white font-bold':''}`}>
+                                                {day.date.getDate()}
+                                                {hasApts && <div className="absolute bottom-1 w-1.5 h-1.5 bg-pink-500 rounded-full"></div>}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                                <div className="mt-6">
+                                    <h4 className="font-bold mb-3">Citas del {selectedDate.toLocaleDateString('es-MX')}</h4>
+                                    <div className="space-y-2">
+                                        {appointments.filter(a => a.date === formatDate(selectedDate)).map(apt => {
+                                            const c = clients.find(x => x.id === apt.clientId);
+                                            const s = specialists.find(x => x.id === apt.specialistId);
+                                            return (
+                                                <div key={apt.id} className="p-4 bg-gray-50 rounded-lg">
+                                                    <div className="flex justify-between items-start">
+                                                        <div>
+                                                            <div className="font-bold">{apt.time} - {s?.name}</div>
+                                                            <div className="text-sm text-gray-600">{c?.name} - {apt.service}</div>
+                                                        </div>
+                                                        <span className={`px-2 py-1 rounded text-xs ${apt.status==='confirmed'?'bg-green-100 text-green-800':'bg-yellow-100 text-yellow-800'}`}>{apt.status}</span>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                        
+                        {/* Citas Admin/Recep */}
+                        {!isClient && view === 'citas' && (
+                            <div>
+                                <h2 className="text-3xl font-bold mb-6">Gestión de Citas</h2>
+                                <div className="bg-white rounded-xl shadow overflow-x-auto">
+                                    <table className="w-full">
+                                        <thead className="bg-gray-50">
+                                            <tr>
+                                                <th className="text-left p-4 text-xs font-semibold text-gray-600">FECHA</th>
+                                                <th className="text-left p-4 text-xs font-semibold text-gray-600">HORA</th>
+                                                <th className="text-left p-4 text-xs font-semibold text-gray-600">CLIENTE</th>
+                                                <th className="text-left p-4 text-xs font-semibold text-gray-600">ESPECIALISTA</th>
+                                                <th className="text-left p-4 text-xs font-semibold text-gray-600">SERVICIO</th>
+                                                <th className="text-left p-4 text-xs font-semibold text-gray-600">ESTADO</th>
+                                                <th className="text-left p-4 text-xs font-semibold text-gray-600">MONTO</th>
+                                                {isAdmin && <th className="text-left p-4 text-xs font-semibold text-gray-600">ACCIONES</th>}
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {appointments.map(a => {
+                                                const c = clients.find(x => x.id === a.clientId);
+                                                const s = specialists.find(x => x.id === a.specialistId);
+                                                return (
+                                                    <tr key={a.id} className="border-t hover:bg-gray-50">
+                                                        <td className="p-4">{a.date}</td>
+                                                        <td className="p-4 font-bold">{a.time}</td>
+                                                        <td className="p-4">{c?.name}</td>
+                                                        <td className="p-4">{s?.name}</td>
+                                                        <td className="p-4">{a.service}</td>
+                                                        <td className="p-4"><span className={`px-2 py-1 rounded text-xs ${a.status==='confirmed'?'bg-green-100 text-green-800':'bg-yellow-100 text-yellow-800'}`}>{a.status}</span></td>
+                                                        <td className="p-4">${a.amount} {a.paid?'✅':'❌'}</td>
+                                                        {isAdmin && (
+                                                            <td className="p-4">
+                                                                <button onClick={() => {
+                                                                    if(confirm('¿Eliminar cita?')) {
+                                                                        setAppointments(appointments.filter(x => x.id !== a.id));
+                                                                    }
+                                                                }} className="text-red-600 hover:text-red-800">🗑️</button>
+                                                            </td>
+                                                        )}
+                                                    </tr>
+                                                );
+                                            })}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        )}
+                        
+                        {/* Clients */}
+                        {!isClient && view === 'clients' && (
+                            <div>
+                                <div className="flex justify-between items-center mb-6">
+                                    <h2 className="text-3xl font-bold">Gestión de Clientes</h2>
+                                    <button onClick={() => { setEditItem(null); setShowModal('client'); }} className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700">➕ Nuevo Cliente</button>
+                                </div>
+                                <div className="bg-white rounded-xl shadow overflow-x-auto">
+                                    <table className="w-full">
+                                        <thead className="bg-gray-50">
+                                            <tr>
+                                                <th className="text-left p-4 text-xs font-semibold text-gray-600">NOMBRE</th>
+                                                <th className="text-left p-4 text-xs font-semibold text-gray-600">TELÉFONO</th>
+                                                <th className="text-left p-4 text-xs font-semibold text-gray-600">EMAIL</th>
+                                                <th className="text-left p-4 text-xs font-semibold text-gray-600">ACCIONES</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {clients.map(c => (
+                                                <tr key={c.id} className="border-t hover:bg-gray-50">
+                                                    <td className="p-4 font-medium">{c.name}</td>
+                                                    <td className="p-4">{c.phone}</td>
+                                                    <td className="p-4">{c.email}</td>
+                                                    <td className="p-4">
+                                                        <button onClick={() => { setEditItem(c); setShowModal('client'); }} className="text-blue-600 hover:text-blue-800 mr-3">✏️</button>
+                                                        {isAdmin && (
+                                                            <button onClick={() => {
+                                                                if(confirm('¿Eliminar cliente?')) {
+                                                                    setClients(clients.filter(x => x.id !== c.id));
+                                                                    setAppointments(appointments.filter(a => a.clientId !== c.id));
+                                                                }
+                                                            }} className="text-red-600 hover:text-red-800">🗑️</button>
+                                                        )}
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        )}
+                        
+                        {/* Specialists */}
+                        {view === 'specialists' && (
+                            <div>
+                                <div className="flex justify-between items-center mb-6">
+                                    <h2 className="text-3xl font-bold">Especialistas</h2>
+                                    {isAdmin && <button onClick={() => { setEditItem(null); setShowModal('specialist'); }} className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700">➕ Nuevo Especialista</button>}
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    {specialists.map(s => (
+                                        <div key={s.id} className="bg-white p-6 rounded-xl shadow text-center">
+                                            <div className="text-5xl mb-3">{s.avatar}</div>
+                                            <div className="font-bold text-lg">{s.name}</div>
+                                            <div className="text-sm text-gray-600 mb-3">{s.specialty}</div>
+                                            {isAdmin && (
+                                                <div className="flex gap-2 justify-center">
+                                                    <button onClick={() => { setEditItem(s); setShowModal('specialist'); }} className="px-3 py-1 text-xs bg-blue-100 text-blue-800 rounded hover:bg-blue-200">✏️ Editar</button>
+                                                    <button onClick={() => {
+                                                        if(confirm('¿Eliminar especialista?')) {
+                                                            setSpecialists(specialists.filter(x => x.id !== s.id));
+                                                        }
+                                                    }} className="px-3 py-1 text-xs bg-red-100 text-red-800 rounded hover:bg-red-200">🗑️</button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                        
+                        {/* Reports Admin */}
+                        {isAdmin && view === 'reports' && (
+                            <div>
+                                <h2 className="text-3xl font-bold mb-6">📊 Reportes</h2>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="bg-white p-6 rounded-xl shadow">
+                                        <h3 className="font-bold text-lg mb-4">Ingresos por Especialista</h3>
+                                        {specialists.map(s => {
+                                            const rev = appointments.filter(a => a.specialistId === s.id && a.paid).reduce((sum, a) => sum + a.amount, 0);
+                                            return (
+                                                <div key={s.id} className="flex justify-between py-2 border-b">
+                                                    <span>{s.name}</span>
+                                                    <span className="font-bold text-green-600">${rev}</span>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                    <div className="bg-white p-6 rounded-xl shadow">
+                                        <h3 className="font-bold text-lg mb-4">Estadísticas</h3>
+                                        <div className="space-y-3">
+                                            <div className="flex justify-between">
+                                                <span>Total Citas</span>
+                                                <span className="font-bold">{appointments.length}</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span>Ingresos Totales</span>
+                                                <span className="font-bold text-green-600">${stats.revenue}</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span>Pendiente de Pago</span>
+                                                <span className="font-bold text-red-600">${appointments.filter(a => !a.paid).reduce((s,a) => s+a.amount,0)}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                        
+                        {/* Settings Admin */}
+                        {isAdmin && view === 'settings' && (
+                            <div>
+                                <h2 className="text-3xl font-bold mb-6">⚙️ Configuración</h2>
+                                <div className="bg-white p-6 rounded-xl shadow">
+                                    <h3 className="font-bold text-lg mb-4">Horarios del Consultorio</h3>
+                                    <p className="text-gray-600 mb-2">Hora de inicio: 08:00 AM</p>
+                                    <p className="text-gray-600 mb-6">Hora de cierre: 20:00 PM</p>
+                                    <div className="space-x-2">
+                                        <button onClick={exportCSV} className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700">📤 Exportar CSV</button>
+                                        <button onClick={sendReminders} className="px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700">📧 Enviar Recordatorios</button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                        
+                        {/* Client: Book */}
+                        {isClient && view === 'book' && (
+                            <div>
+                                <h2 className="text-3xl font-bold mb-6">Agendar Nueva Cita</h2>
+                                {!selectedSpecialist ? (
+                                    <div>
+                                        <h3 className="text-xl font-bold mb-4">1. Selecciona una Especialidad</h3>
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                            {specialists.filter(s => s.active).map(s => (
+                                                <div key={s.id} onClick={() => setSelectedSpecialist(s)} className="bg-white p-6 rounded-xl shadow hover:shadow-lg cursor-pointer border-2 hover:border-purple-600 transition text-center">
+                                                    <div className="text-5xl mb-3">{s.avatar}</div>
+                                                    <div className="font-bold text-lg">{s.name}</div>
+                                                    <div className="text-sm text-gray-600">{s.specialty}</div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ) : !selectedService ? (
+                                    <div>
+                                        <button onClick={() => setSelectedSpecialist(null)} className="mb-4 px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">← Volver</button>
+                                        <h3 className="text-xl font-bold mb-4">2. Selecciona un Servicio</h3>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            {services[selectedSpecialist.specialty].map((srv, i) => (
+                                                <div key={i} onClick={() => setSelectedService(srv)} className="bg-white p-6 rounded-xl shadow hover:shadow-lg cursor-pointer border-2 hover:border-purple-600 transition">
+                                                    <div className="font-bold text-lg">{srv.name}</div>
+                                                    <div className="text-2xl font-bold text-purple-600 mt-2">${srv.price}</div>
+                                                    <div className="text-sm text-gray-600 mt-1">{srv.duration} minutos</div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div>
+                                        <button onClick={() => setSelectedService(null)} className="mb-4 px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">← Volver</button>
+                                        <h3 className="text-xl font-bold mb-4">3. Selecciona Fecha y Hora</h3>
+                                        <div className="bg-purple-50 p-4 rounded-lg mb-4">
+                                            <div className="font-bold">{selectedSpecialist.name}</div>
+                                            <div className="text-sm">{selectedService.name} - ${selectedService.price}</div>
+                                        </div>
+                                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                            <div className="lg:col-span-2 bg-white p-6 rounded-xl shadow">
+                                                <div className="flex justify-between items-center mb-4">
+                                                    <button onClick={() => { const m = new Date(month); m.setMonth(m.getMonth()-1); setMonth(m); }} className="px-4 py-2 bg-gray-200 rounded">← Anterior</button>
+                                                    <h4 className="font-bold">{month.toLocaleDateString('es-MX',{month:'long',year:'numeric'})}</h4>
+                                                    <button onClick={() => { const m = new Date(month); m.setMonth(m.getMonth()+1); setMonth(m); }} className="px-4 py-2 bg-gray-200 rounded">Siguiente →</button>
+                                                </div>
+                                                <div className="grid grid-cols-7 gap-2 mb-2">
+                                                    {['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'].map(d => <div key={d} className="text-center font-bold text-sm">{d}</div>)}
+                                                </div>
+                                                <div className="grid grid-cols-7 gap-2">
+                                                    {getDaysInMonth(month).map((day,i) => {
+                                                        const isPast = day.date < new Date() && formatDate(day.date) !== formatDate(new Date());
+                                                        const isSelected = formatDate(day.date) === formatDate(selectedDate);
+                                                        return (
+                                                            <div key={i} onClick={() => day.current && !isPast && setSelectedDate(day.date)} className={`aspect-square flex items-center justify-center rounded-lg cursor-pointer ${!day.current||isPast?'text-gray-300 cursor-not-allowed':'hover:bg-purple-50'} ${isSelected?'bg-yellow-400 font-bold':''}`}>
+                                                                {day.date.getDate()}
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+                                            <div className="bg-white p-6 rounded-xl shadow">
+                                                <h4 className="font-bold mb-3">Horarios Disponibles</h4>
+                                                <p className="text-xs text-gray-600 mb-3">{selectedDate.toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long'})}</p>
+                                                <div className="space-y-2 max-h-96 overflow-y-auto">
+                                                    {timeSlots.map(time => {
+                                                        const occupied = appointments.some(a => a.date === formatDate(selectedDate) && a.time === time && a.specialistId === selectedSpecialist.id && a.status !== 'cancelled');
+                                                        return (
+                                                            <div key={time} onClick={() => !occupied && setSelectedTime(time)} className={`p-2 text-center rounded cursor-pointer ${occupied?'bg-red-100 text-red-600 cursor-not-allowed':'bg-gray-100 hover:bg-purple-600 hover:text-white'} ${selectedTime===time?'bg-purple-600 text-white':''}`}>
+                                                                {time}
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                                {selectedTime && (
+                                                    <button onClick={() => {
+                                                        const newApt = {
+                                                            id: Date.now(),
+                                                            clientId: user.clientId,
+                                                            specialistId: selectedSpecialist.id,
+                                                            date: formatDate(selectedDate),
+                                                            time: selectedTime,
+                                                            service: selectedService.name,
+                                                            status: 'confirmed',
+                                                            paid: false,
+                                                            amount: selectedService.price,
+                                                            notes: ''
+                                                        };
+                                                        setAppointments([...appointments, newApt]);
+                                                        alert('✅ Cita agendada exitosamente');
+                                                        setSelectedSpecialist(null);
+                                                        setSelectedService(null);
+                                                        setSelectedTime(null);
+                                                    }} className="w-full mt-4 bg-purple-600 text-white py-3 rounded-lg font-bold hover:bg-purple-700">
+                                                        Confirmar Cita
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                        
+                        {/* Client: My Citas */}
+                        {isClient && view === 'mycitas' && (
+                            <div>
+                                <h2 className="text-3xl font-bold mb-6">Mis Citas</h2>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                                    <div className="bg-white p-6 rounded-xl shadow border-l-4 border-purple-600">
+                                        <div className="text-sm text-gray-600">Total Citas</div>
+                                        <div className="text-3xl font-bold">{stats.myTotal}</div>
+                                    </div>
+                                    <div className="bg-white p-6 rounded-xl shadow border-l-4 border-green-600">
+                                        <div className="text-sm text-gray-600">Próximas</div>
+                                        <div className="text-3xl font-bold">{stats.myUpcoming}</div>
+                                    </div>
+                                </div>
+                                <div className="space-y-4">
+                                    {appointments.filter(a => a.clientId === user.clientId).sort((a,b) => new Date(b.date) - new Date(a.date)).map(apt => {
+                                        const s = specialists.find(x => x.id === apt.specialistId);
+                                        const isPast = new Date(apt.date) < new Date();
+                                        return (
+                                            <div key={apt.id} className="bg-white p-6 rounded-xl shadow border-l-4 border-purple-600">
+                                                <div className="flex justify-between items-start mb-3">
+                                                    <div>
+                                                        <div className="text-2xl mb-1">{s?.avatar}</div>
+                                                        <div className="font-bold text-lg">{s?.name}</div>
+                                                        <div className="text-sm text-gray-600">{apt.service}</div>
+                                                    </div>
+                                                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${apt.status==='confirmed'?'bg-green-100 text-green-800':apt.status==='cancelled'?'bg-red-100 text-red-800':'bg-yellow-100 text-yellow-800'}`}>{apt.status}</span>
+                                                </div>
+                                                <div className="space-y-1 mb-3">
+                                                    <div className="text-sm">📅 {apt.date} - 🕐 {apt.time}</div>
+                                                    <div className="text-sm">💰 ${apt.amount} - {apt.paid?'✅ Pagado':'⏳ Pendiente'}</div>
+                                                </div>
+                                                {!isPast && apt.status !== 'cancelled' && (
+                                                    <div className="flex gap-2">
+                                                        <button onClick={() => { setEditItem(apt); setShowModal('reschedule'); }} className="px-3 py-2 text-xs bg-blue-100 text-blue-800 rounded hover:bg-blue-200">🔄 Reprogramar</button>
+                                                        <button onClick={() => {
+                                                            if(confirm('¿Cancelar esta cita?')) {
+                                                                setAppointments(appointments.map(a => a.id === apt.id ? {...a, status: 'cancelled'} : a));
+                                                            }
+                                                        }} className="px-3 py-2 text-xs bg-red-100 text-red-800 rounded hover:bg-red-200">✕ Cancelar</button>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                    
+                    {/* Modal Client */}
+                    {showModal === 'client' && (
+                        <div onClick={() => setShowModal(false)} className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+                            <div onClick={e => e.stopPropagation()} className="bg-white rounded-xl p-6 w-full max-w-md">
+                                <h3 className="text-xl font-bold mb-4">{editItem ? 'Editar' : 'Nuevo'} Cliente</h3>
+                                <form onSubmit={e => {
+                                    e.preventDefault();
+                                    const form = e.target;
+                                    if (editItem) {
+                                        setClients(clients.map(c => c.id === editItem.id ? {...c, name: form.name.value, phone: form.phone.value, email: form.email.value} : c));
+                                    } else {
+                                        setClients([...clients, {id: Date.now(), name: form.name.value, phone: form.phone.value, email: form.email.value}]);
+                                    }
+                                    setShowModal(false);
+                                    setEditItem(null);
+                                }}>
+                                    <input name="name" defaultValue={editItem?.name} placeholder="Nombre" className="w-full px-4 py-2 border-2 rounded mb-3" required />
+                                    <input name="phone" defaultValue={editItem?.phone} placeholder="Teléfono" className="w-full px-4 py-2 border-2 rounded mb-3" required />
+                                    <input name="email" defaultValue={editItem?.email} placeholder="Email" type="email" className="w-full px-4 py-2 border-2 rounded mb-3" />
+                                    <div className="flex gap-2">
+                                        <button type="submit" className="flex-1 bg-purple-600 text-white py-2 rounded hover:bg-purple-700">Guardar</button>
+                                        <button type="button" onClick={() => setShowModal(false)} className="px-4 bg-gray-200 rounded hover:bg-gray-300">Cancelar</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    )}
+                    
+                    {/* Modal Specialist */}
+                    {showModal === 'specialist' && (
+                        <div onClick={() => setShowModal(false)} className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+                            <div onClick={e => e.stopPropagation()} className="bg-white rounded-xl p-6 w-full max-w-md">
+                                <h3 className="text-xl font-bold mb-4">{editItem ? 'Editar' : 'Nuevo'} Especialista</h3>
+                                <form onSubmit={e => {
+                                    e.preventDefault();
+                                    const form = e.target;
+                                    if (editItem) {
+                                        setSpecialists(specialists.map(s => s.id === editItem.id ? {...s, name: form.name.value, specialty: form.specialty.value, avatar: form.avatar.value} : s));
+                                    } else {
+                                        setSpecialists([...specialists, {id: Date.now(), name: form.name.value, specialty: form.specialty.value, avatar: form.avatar.value, active: true}]);
+                                    }
+                                    setShowModal(false);
+                                    setEditItem(null);
+                                }}>
+                                    <input name="name" defaultValue={editItem?.name} placeholder="Nombre" className="w-full px-4 py-2 border-2 rounded mb-3" required />
+                                    <input name="specialty" defaultValue={editItem?.specialty} placeholder="Especialidad" className="w-full px-4 py-2 border-2 rounded mb-3" required />
+                                    <input name="avatar" defaultValue={editItem?.avatar} placeholder="Emoji Avatar" className="w-full px-4 py-2 border-2 rounded mb-3" required />
+                                    <div className="flex gap-2">
+                                        <button type="submit" className="flex-1 bg-purple-600 text-white py-2 rounded hover:bg-purple-700">Guardar</button>
+                                        <button type="button" onClick={() => setShowModal(false)} className="px-4 bg-gray-200 rounded hover:bg-gray-300">Cancelar</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    )}
+                    
+                    {/* Modal Reschedule */}
+                    {showModal === 'reschedule' && editItem && (
+                        <div onClick={() => setShowModal(false)} className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+                            <div onClick={e => e.stopPropagation()} className="bg-white rounded-xl p-6 w-full max-w-md">
+                                <h3 className="text-xl font-bold mb-4">Reprogramar Cita</h3>
+                                <form onSubmit={e => {
+                                    e.preventDefault();
+                                    const form = e.target;
+                                    setAppointments(appointments.map(a => a.id === editItem.id ? {...a, date: form.date.value, time: form.time.value} : a));
+                                    alert('✅ Cita reprogramada');
+                                    setShowModal(false);
+                                    setEditItem(null);
+                                }}>
+                                    <input name="date" type="date" defaultValue={editItem.date} className="w-full px-4 py-2 border-2 rounded mb-3" required />
+                                    <select name="time" defaultValue={editItem.time} className="w-full px-4 py-2 border-2 rounded mb-3" required>
+                                        {timeSlots.map(t => <option key={t} value={t}>{t}</option>)}
+                                    </select>
+                                    <div className="flex gap-2">
+                                        <button type="submit" className="flex-1 bg-purple-600 text-white py-2 rounded hover:bg-purple-700">Guardar</button>
+                                        <button type="button" onClick={() => setShowModal(false)} className="px-4 bg-gray-200 rounded hover:bg-gray-300">Cancelar</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+        
+        ReactDOM.createRoot(document.getElementById('root')).render(<AgendaPro />);
+    </script>
+</body>
+</html>
