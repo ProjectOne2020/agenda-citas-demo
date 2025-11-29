@@ -1,7 +1,7 @@
 # 📅 AgendaPro - Sistema de Gestión de Citas Online
 
-[![Estado](https://img.shields.io/badge/Estado-Funcional-success)](https://github.com/tuusuario/agendapro)
-[![Versión](https://img.shields.io/badge/Versión-1.0.0-blue)](https://github.com/tuusuario/agendapro)
+[![Estado](https://img.shields.io/badge/Estado-Funcional-success)](https://reserva-de-citas.netlify.app)
+[![Versión](https://img.shields.io/badge/Versión-1.0.0-blue)](https://github.com/projectone2020/agendapro-sistema-citas)
 [![Licencia](https://img.shields.io/badge/Licencia-MIT-green)](LICENSE)
 [![React](https://img.shields.io/badge/React-18-61dafb)](https://reactjs.org/)
 [![Tailwind](https://img.shields.io/badge/Tailwind-CSS-38bdf8)](https://tailwindcss.com/)
@@ -20,7 +20,6 @@
 - [Tecnologías Utilizadas](#-tecnologías-utilizadas)
 - [Usuarios de Prueba](#-usuarios-de-prueba)
 - [Datos Precargados](#-datos-precargados)
-- [Instalación](#-instalación)
 - [Casos de Uso](#-casos-de-uso)
 - [Arquitectura](#-arquitectura)
 - [Roadmap](#-roadmap)
@@ -466,56 +465,6 @@ Contraseña: cliente123
 
 ---
 
-## 🚀 Instalación
-
-### **Opción 1: Uso Directo**
-
-1. Descarga el archivo `agenda-pro-completo.html`
-2. Abre el archivo en cualquier navegador web moderno
-3. ¡Listo! El sistema está funcionando
-
----
-
-### **Opción 2: Despliegue en Netlify**
-
-1. **Renombra el archivo:**
-   ```bash
-   mv agenda-pro-completo.html index.html
-   ```
-
-2. **Sube a Netlify:**
-   - Ve a [app.netlify.com](https://app.netlify.com)
-   - Arrastra el archivo `index.html` al área de drop
-   - Netlify te asignará una URL automáticamente
-
-3. **Personaliza tu dominio (opcional):**
-   - Site settings → Domain management
-   - Cambia el nombre del sitio
-
----
-
-### **Opción 3: GitHub Pages**
-
-1. **Crear repositorio:**
-   ```bash
-   git init
-   git add index.html
-   git commit -m "Initial commit"
-   git remote add origin https://github.com/tuusuario/agendapro.git
-   git push -u origin main
-   ```
-
-2. **Activar GitHub Pages:**
-   - Settings → Pages
-   - Source: Deploy from branch
-   - Branch: main / root
-   - Save
-
-3. **Acceder:**
-   - https://tuusuario.github.io/agendapro
-
----
-
 ## 💼 Casos de Uso
 
 ### **1. Consultorio Médico General** ✅
@@ -908,7 +857,7 @@ Este proyecto está bajo la Licencia MIT.
 ```
 MIT License
 
-Copyright (c) 2024 Tu Nombre
+Copyright (c) 2024 Alejandro Gutiérrez
 
 Se concede permiso, de forma gratuita, a cualquier persona que obtenga una copia
 de este software y archivos de documentación asociados (el "Software"), para 
@@ -934,10 +883,10 @@ vender copias del Software...
 - ✅ Apps móviles nativas
 
 ### **Contáctame:**
-- 📧 Email: tu@email.com
-- 💼 LinkedIn: [Tu Perfil](https://linkedin.com/in/tuusuario)
-- 🌐 Portafolio: [tuportafolio.com](https://tuportafolio.com)
-- 📱 WhatsApp: [Enviar mensaje](https://wa.me/521234567890)
+- 📧 Email: contacto@alejandrodev.com
+- 💼 LinkedIn: [Alejandro Gutiérrez](https://linkedin.com/in/alejandro-gutierrez-dev)
+- 🌐 Portafolio: [projectone2020.github.io/portafolio](https://projectone2020.github.io/portafolio/)
+- 📱 WhatsApp: [Enviar mensaje](https://wa.me/528110481221)
 
 ---
 
@@ -945,22 +894,22 @@ vender copias del Software...
 
 ### **Otros Sistemas Desarrollados:**
 
-1. **[Sistema de Inventario](https://github.com/tuusuario/inventario-demo)**
+1. **[Sistema de Inventario](https://github.com/projectone2020/inventario-demo)**
    - Control de stock
    - Alertas de bajo inventario
    - Reportes de movimientos
 
-2. **[Sistema POS](https://github.com/tuusuario/pos-demo)**
+2. **[Sistema POS](https://github.com/projectone2020/pos-demo)**
    - Punto de venta
    - Gestión de ventas
    - Reportes financieros
 
-3. **[CRM Empresarial](https://github.com/tuusuario/crm-demo)**
+3. **[CRM Empresarial](https://github.com/projectone2020/crm-demo)**
    - Gestión de clientes
    - Pipeline de ventas
    - Seguimiento de oportunidades
 
-4. **[Tienda Online](https://github.com/tuusuario/tienda-demo)**
+4. **[Tienda Online](https://github.com/projectone2020/tienda-online-demo)**
    - E-commerce completo
    - Carrito de compras
    - Panel administrativo
@@ -972,8 +921,8 @@ vender copias del Software...
 ### **¿Preguntas? ¿Problemas? ¿Sugerencias?**
 
 **Canales de Soporte:**
-- 🐛 [Reportar un Bug](https://github.com/tuusuario/agendapro/issues)
-- 💡 [Sugerir una Funcionalidad](https://github.com/tuusuario/agendapro/issues)
+- 🐛 [Reportar un Bug](https://github.com/projectone2020/agendapro-sistema-citas/issues)
+- 💡 [Sugerir una Funcionalidad](https://github.com/projectone2020/agendapro-sistema-citas/issues)
 - 📧 Email: soporte@tudominio.com
 - 💬 Discord: [Unirse al servidor](https://discord.gg/tuservidor)
 
@@ -992,15 +941,15 @@ Gracias por usar **AgendaPro**. Si este proyecto te fue útil:
 
 ## 📊 Métricas del Proyecto
 
-![GitHub stars](https://img.shields.io/github/stars/tuusuario/agendapro?style=social)
-![GitHub forks](https://img.shields.io/github/forks/tuusuario/agendapro?style=social)
-![GitHub watchers](https://img.shields.io/github/watchers/tuusuario/agendapro?style=social)
+![GitHub stars](https://img.shields.io/github/stars/projectone2020/agendapro-sistema-citas?style=social)
+![GitHub forks](https://img.shields.io/github/forks/projectone2020/agendapro-sistema-citas?style=social)
+![GitHub watchers](https://img.shields.io/github/watchers/projectone2020/agendapro-sistema-citas?style=social)
 
 ---
 
 <div align="center">
 
-**Hecho con ❤️ por [Tu Nombre](https://github.com/tuusuario)**
+**Hecho con ❤️ por [Alejandro Gutiérrez](https://github.com/projectone2020)**
 
 [⬆ Volver arriba](#-agendapro---sistema-de-gestión-de-citas-online)
 
